@@ -362,6 +362,7 @@ MonoBehaviour:
   hallwayNS: {fileID: 6559043966180805005, guid: 0e69c305a7ce7e64ba6d4784353ec57c, type: 3}
   hallwayWE: {fileID: 4733726039258835675, guid: 356c711bf7412534089438a23d84d2cc, type: 3}
   startingRoom: {fileID: 599060339079904210, guid: acd976c6c66863244a1dc5b9d847dd00, type: 3}
+  portalPrefab: {fileID: 6896981446122883636, guid: d29d483279a005044ba80e964b81030f, type: 3}
 --- !u!4 &520118566
 Transform:
   m_ObjectHideFlags: 0

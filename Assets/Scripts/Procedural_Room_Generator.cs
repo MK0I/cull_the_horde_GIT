@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class Infinite_Room_Generator : MonoBehaviour
+public class Procedural_Room_Generator : MonoBehaviour
 {
     [Header("Rooms")]
     [SerializeField] private Room_Data[] roomPrefabs;
@@ -14,11 +14,18 @@ public class Infinite_Room_Generator : MonoBehaviour
     [Header("Starting Room")]
     [SerializeField] private Room_Data startingRoom;
 
+    [Header("Portal")]
+    [SerializeField] private GameObject portalPrefab;
+
     private Room_Data currentRoom;
 
     private List<Vector3> occupiedPositions = new();
 
     private List<Bounds> occupiedBounds = new();
+
+    private Direction pendingDirection;
+
+    private bool portalSpawned;
 
     private void Start()
     {
@@ -42,7 +49,7 @@ public class Infinite_Room_Generator : MonoBehaviour
 
         if (roomExit == null)
         {
-            Debug.Log("Generation finished.");
+            SpawnPortal();
             return;
         }
 
@@ -90,7 +97,9 @@ public class Infinite_Room_Generator : MonoBehaviour
 
         if (roomInstance == null)
         {
-            Debug.LogWarning("No valid room placement found.");
+            Debug.Log("Generation complete.");
+
+            SpawnPortal();
             return;
         }
 
@@ -110,7 +119,10 @@ public class Infinite_Room_Generator : MonoBehaviour
         if (overlaps)
         {
             Destroy(roomInstance.gameObject);
-            Debug.Log("Room overlaps existing room.");
+
+            Debug.Log("Generation complete. Room overlaps existing room.");
+
+            SpawnPortal();
             return;
         }
 
@@ -124,12 +136,35 @@ public class Infinite_Room_Generator : MonoBehaviour
 
         Debug.Log($"{roomInstance.name} -> {next}");
 
-        Invoke(nameof(ContinueGeneration), 1f);
-
         pendingDirection = next;
+
+        Invoke(nameof(ContinueGeneration), 1f);
     }
 
-    private Direction pendingDirection;
+    private void SpawnPortal()
+    {
+        if (portalSpawned)
+            return;
+
+        portalSpawned = true;
+
+        if (portalPrefab == null)
+        {
+            Debug.LogWarning("Portal Prefab not assigned.");
+            return;
+        }
+
+        if (currentRoom.portalSpawnPoint == null)
+        {
+            Debug.LogWarning("Portal Spawn Point missing on room.");
+            return;
+        }
+
+        Instantiate(
+            portalPrefab,
+            currentRoom.portalSpawnPoint.position,
+            Quaternion.identity);
+    }
 
     private Bounds GetRoomBounds(Room_Data room)
     {
