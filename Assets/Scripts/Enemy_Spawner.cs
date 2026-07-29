@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class Enemy_Spawner : MonoBehaviour
@@ -8,13 +9,27 @@ public class Enemy_Spawner : MonoBehaviour
     [Header("Spawn Points")]
     [SerializeField] private Transform[] spawnPoints;
 
+    [Header("Spawn Interval (seconds)")]
+    [SerializeField] private float minInterval = 2f;
+    [SerializeField] private float maxInterval = 5f;
+
     private void Start()
     {
-        SpawnEnemies(); // Debug.Log($"{name}: Spawning Enemy.");
-
+        StartCoroutine(SpawnLoop());
     }
 
-    public void SpawnEnemies()
+    private IEnumerator SpawnLoop()
+    {
+        while (true)
+        {
+            float wait = Random.Range(minInterval, maxInterval);
+            yield return new WaitForSeconds(wait);
+
+            SpawnOneEnemy();
+        }
+    }
+
+    private void SpawnOneEnemy()
     {
         if (enemyPrefabs == null || enemyPrefabs.Length == 0)
         {
@@ -22,14 +37,23 @@ public class Enemy_Spawner : MonoBehaviour
             return;
         }
 
-        foreach (Transform point in spawnPoints)
+        if (spawnPoints == null || spawnPoints.Length == 0)
         {
-            if (point == null)
-                continue;
-
-            GameObject enemyPrefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
-
-            Instantiate(enemyPrefab, point.position, Quaternion.identity);
+            Debug.LogWarning($"{name}: No Spawn Points assigned.");
+            return;
         }
+
+        // Randomizer
+        Transform point = spawnPoints[Random.Range(0, spawnPoints.Length)];
+        GameObject prefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
+
+        if (point != null && prefab != null)
+            Instantiate(prefab, point.position, Quaternion.identity);
+    }
+
+    // Stopper
+    public void StopSpawning()
+    {
+        StopAllCoroutines();
     }
 }

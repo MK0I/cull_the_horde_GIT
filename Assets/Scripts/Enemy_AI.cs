@@ -4,7 +4,7 @@ using UnityEngine;
 public class Enemy_AI : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField] private float moveSpeed = 2.5f;
+    [SerializeField] private float baseMoveSpeed = 2.5f;
 
     [Header("References")]
     [SerializeField] private Transform target;
@@ -18,11 +18,9 @@ public class Enemy_AI : MonoBehaviour
         if (target == null)
         {
             GameObject player = GameObject.FindGameObjectWithTag("Player");
-
             if (player != null)
                 target = player.transform;
         }
-
     }
 
     private void FixedUpdate()
@@ -30,10 +28,11 @@ public class Enemy_AI : MonoBehaviour
         if (target == null)
             return;
 
-        Vector2 direction =
-            ((Vector2)target.position - rb.position).normalized;
+        float multiplier = Game_Manager.Instance != null
+            ? Game_Manager.Instance.EnemySpeedMultiplier
+            : 1f;
 
-        rb.linearVelocity = direction * moveSpeed;
+        Vector2 direction = ((Vector2)target.position - rb.position).normalized;
+        rb.linearVelocity = direction * (baseMoveSpeed * multiplier);
     }
-
 }
